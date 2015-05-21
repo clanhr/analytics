@@ -7,17 +7,27 @@
   []
   (or (env :clanhr-segment-token) "o8CiVtd14K65kWGl4sHHEdzk5GbN7NCD"))
 
+(defn- logger
+  "Logs events"
+  [user-id event-name traits s m]
+  (println (str user-id " '" event-name "' " m " : " traits)))
+
+(defn- build-options
+  "Builds default options"
+  [user-id event-name traits]
+  {:callback (partial logger user-id event-name traits)})
+
 (def ^:private client (analytics/initialize (token)))
-(def ^:private options {})
+(def ^:private options {:callback logger})
 
 (defn identify
   "Identifies a user and sets user traits"
   [user-id traits]
-  (analytics/identify client user-id traits))
+  (analytics/identify client user-id traits (build-options user-id "identify" traits)))
 
 (defn track
   "Tracks an event for a given user"
   ([user-id event-name]
    (track user-id event-name {}))
   ([user-id event-name traits]
-   (analytics/track client user-id event-name traits options)))
+   (analytics/track client user-id event-name traits (build-options user-id event-name traits))))
