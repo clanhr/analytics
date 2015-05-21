@@ -3,12 +3,15 @@
 
 (defn exception
   "Registers a exception"
-  [ex])
+  [ex]
+  (println ex))
 
 (defn request-exception
   "Registers a exception from a request"
-  [request ex])
+  [request ex]
+  (println ex))
 
 (defn error
   "Registers a specific error"
-  [error])
+  [error]
+  (println error))
