@@ -1,0 +1,2 @@
+# analytics
+ClanHR specific analytics
