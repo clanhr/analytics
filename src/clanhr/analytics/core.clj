@@ -17,17 +17,22 @@
   [user-id event-name traits]
   {:callback (partial logger user-id event-name traits)})
 
-(def ^:private client (analytics/initialize (token)))
-(def ^:private options {:callback logger})
+(def ^:private client (atom nil))
+(defn- get-client
+  []
+  (swap! client (fn [content]
+                  (if content
+                    content
+                    (analytics/initialize (token))))))
 
 (defn identify
   "Identifies a user and sets user traits"
   [user-id traits]
-  (analytics/identify client user-id traits (build-options user-id "identify" traits)))
+  (analytics/identify (get-client) user-id traits (build-options user-id "identify" traits)))
 
 (defn track
   "Tracks an event for a given user"
   ([user-id event-name]
    (track user-id event-name {}))
   ([user-id event-name traits]
-   (analytics/track client user-id event-name traits (build-options user-id event-name traits))))
+   (analytics/track (get-client) user-id event-name traits (build-options user-id event-name traits))))
