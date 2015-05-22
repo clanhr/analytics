@@ -25,10 +25,20 @@
                     content
                     (analytics/initialize (token))))))
 
+(defn- build-traits
+  "Prepares traits with required fields"
+  [traits user-id]
+  (cond-> traits
+    (not (:userId traits)) (assoc :userId user-id)))
+
 (defn identify
   "Identifies a user and sets user traits"
   [user-id traits]
-  (analytics/identify (get-client) user-id traits (build-options user-id "identify" traits)))
+  (let [traits (build-traits traits user-id)]
+    (analytics/identify (get-client)
+                        user-id
+                        traits
+                        (build-options user-id "identify" traits))))
 
 (defn track
   "Tracks an event for a given user"

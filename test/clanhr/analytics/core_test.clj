@@ -5,7 +5,10 @@
 (def user-id "clojure-test")
 
 (deftest smoke-test-identify
-  (core/identify user-id {:name "Clojure Test"}))
+  (core/identify user-id {:name "Clojure Test"})
+  (core/identify user-id {:userId "Clojure Test"})
+  (core/identify user-id nil)
+  (core/identify user-id {}))
 
 (deftest smoke-test-track
   (core/track user-id "Clojure unit test"))
