@@ -29,6 +29,7 @@
   "Prepares traits with required fields"
   [traits user-id]
   (cond-> traits
+    (not (:language traits)) (assoc :language "en")
     (not (:userId traits)) (assoc :userId user-id)))
 
 (defn identify
