@@ -15,3 +15,8 @@
   "Registers a specific error"
   [error]
   (println error))
+
+(Thread/setDefaultUncaughtExceptionHandler
+  (reify java.lang.Thread$UncaughtExceptionHandler
+    (uncaughtException [_ thread throwable]
+      (exception throwable))))
