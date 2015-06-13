@@ -15,18 +15,31 @@
                           ops
                           {:connection-manager (metrics/connection-manager {})}))))
 
+(defn- log-stdout?
+  "True if the lib should println stuff"
+  []
+  (= "true" (env :clanhr-analytics-log-stdout)))
+
+(defn- log-librato?
+  "True if the lib should send stuff to librato metrics"
+  []
+  (= "true" (env :clanhr-analytics-log-librato)))
+
 (defn- register
   "Registers a metric to librato"
   [env-name source event-name value description]
-  (future
-    (metrics/collate (librato-user)
-                     (librato-token)
-                     [{:name event-name
-                       :source source
-                       :period default-metric-period
-                       :value value }]
-                     []
-                     (options))))
+  (when (log-stdout?)
+    (println (str "[" source "] " event-name " " value " ms - " description)))
+  (when (log-librato?)
+    (future
+      (metrics/collate (librato-user)
+                       (librato-token)
+                       [{:name event-name
+                         :source source
+                         :period default-metric-period
+                         :value value }]
+                       []
+                       (options)))))
 
 (defn postgres-request
   "Tracks a postgres query"
