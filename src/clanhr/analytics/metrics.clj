@@ -20,7 +20,7 @@
                           {:connection-manager (metrics/connection-manager {})}))))
 
 (def ^:private events-processor
-  (future
+  (delay (future
     (while true
       (do (Thread/sleep 300)
         (let [current-events @events]
@@ -30,13 +30,13 @@
                              current-events
                              []
                              (options))
-            (reset! events [])))))))
-
+            (reset! events []))))))))
 
 (defn- register-event
   "Registers an event to be sent later"
   [event]
-  (swap! events conj event))
+  (let [touch-runner @events-processor]
+    (swap! events conj event)))
 
 (defn- log-stdout?
   "True if the lib should println stuff"
