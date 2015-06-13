@@ -1,5 +1,7 @@
 (ns clanhr.analytics.metrics
   (:require [clj-librato.metrics :as metrics]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
             [environ.core :refer [env]]))
 
 (defn- librato-user [] (or (env :clanhr-librato-user) "hello@clanhr.com"))
@@ -31,15 +33,17 @@
   (when (log-stdout?)
     (println (str "[" source "] " event-name " " value " ms - " description)))
   (when (log-librato?)
-    (future
-      (metrics/collate (librato-user)
-                       (librato-token)
-                       [{:name event-name
-                         :source source
-                         :period default-metric-period
-                         :value value }]
-                       []
-                       (options)))))
+    (let [current-time (tc/to-long (t/now))]
+      (future
+        (metrics/collate (librato-user)
+                         (librato-token)
+                         [{:name event-name
+                           :source source
+                           :period default-metric-period
+                           :measure_time current-time
+                           :value value }]
+                         []
+                         (options))))))
 
 (defn postgres-request
   "Tracks a postgres query"
