@@ -1,4 +1,4 @@
-(defproject clanhr/analytics "0.6.3"
+(defproject clanhr/analytics "1.0.0"
   :description "ClanHR specific analytics"
   :url "https://github.com/clanhr/analytics"
   :license {:name "Eclipse Public License"
