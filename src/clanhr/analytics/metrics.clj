@@ -52,7 +52,7 @@
   "Registers a metric to librato"
   [env-name source event-name value description]
   (when (log-stdout?)
-    (println (str "[" source "] " event-name " " value " ms - " description)))
+    (println (str "[" source "] " event-name " " value " - " description)))
   (when (log-librato?)
     (let [current-time (/ (tc/to-long (t/now)) 1000.0)]
       (register-event {:name event-name
@@ -64,4 +64,22 @@
 (defn postgres-request
   "Tracks a postgres query"
   [env-name source elapsed query]
-  (register env-name source (str env-name ".postgresql") elapsed query))
+  (register env-name source (str env-name ".postgresql.ms") elapsed query))
+
+(defn http-request
+  "Tracks a http request"
+  [env-name source elapsed request response]
+  (let [uri (:uri request)]
+    (register env-name source (str env-name ".http.ms") elapsed uri)
+    (register env-name source (str env-name ".http.rpm") 1 uri)))
+
+(defn http-request-metric-fn
+  "Returns a function that tracks http information. Good to use on ring
+  middelwares"
+  [handler service-name]
+  (fn [request]
+    (let [start (. System (nanoTime))
+          response (handler request)
+          elapsed (/ (double (- (. System (nanoTime)) start)) 1000000.0)]
+      (http-request (env :clanhr-env) service-name (int elapsed) request response)
+      response)))

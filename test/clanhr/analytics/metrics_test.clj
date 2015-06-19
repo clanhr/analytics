@@ -3,6 +3,10 @@
             [clanhr.analytics.metrics :as metrics]))
 
 (deftest postgres-request
-  (metrics/postgres-request "test" "clanhr.analytics" 10 "select * from users")
+  (metrics/postgres-request "test" "clanhr.analytics.postgres" 10 "select * from users")
+  (Thread/sleep 3000))
+
+(deftest http-request
+  (metrics/http-request "test" "clanhr.analytics.http" 10 {:uri "/"} {:status 200})
   (Thread/sleep 3000))
 
