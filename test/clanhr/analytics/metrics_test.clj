@@ -7,6 +7,6 @@
   (Thread/sleep 3000))
 
 (deftest http-request
-  (metrics/http-request "test" "clanhr.analytics.http" 10 "/")
+  (metrics/http-request "test" "clanhr.analytics.http" 10 {:uri "/"} {:status 200})
   (Thread/sleep 3000))
 
