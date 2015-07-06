@@ -2,15 +2,17 @@
   (:require [ardoq.analytics-clj :as analytics]
             [environ.core :refer [env]]))
 
+(def ^:private segment-test-token "IBqHKDwieBPjkZMtqhYbxStKc0KziG4M")
+
 (defn- token
   "Access token for segment.io"
   []
-  (env :clanhr-segment-token))
+  (or (env :clanhr-segment-token) segment-test-token))
 
 (defn- test-token
   "Access void token for segment.io"
   []
-  (or (env :clanhr-segment-void-token) "IBqHKDwieBPjkZMtqhYbxStKc0KziG4M"))
+  (or (env :clanhr-segment-void-token) segment-test-token))
 
 (defn- logger
   "Logs events"
