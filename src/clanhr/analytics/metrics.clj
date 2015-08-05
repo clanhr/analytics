@@ -1,5 +1,6 @@
 (ns clanhr.analytics.metrics
   (:require [clj-librato.metrics :as metrics]
+            [clanhr.analytics.errors :as errors]
             [clj-time.core :as t]
             [clj-time.local :as l]
             [clj-time.coerce :as tc]
@@ -19,18 +20,28 @@
                           ops
                           {:connection-manager (metrics/connection-manager {})}))))
 
+(defn- verbose?
+  "True if the lib should println own debug stuff"
+  []
+  (= "true" (env :clanhr-analytics-verbose)))
+
 (def ^:private events-processor
   (delay (future
     (while true
-      (do (Thread/sleep 300)
-        (let [current-events @events]
-          (when (< 0 (count current-events))
-            (metrics/collate (librato-user)
-                             (librato-token)
-                             current-events
-                             []
-                             (options))
-            (reset! events []))))))))
+      (try
+        (do (Thread/sleep 1000)
+          (let [current-events @events]
+            (when (verbose?)
+              (println "** Registering" (count current-events) "events on librato..."))
+            (when (< 0 (count current-events))
+              (reset! events [])
+              (metrics/collate (librato-user)
+                               (librato-token)
+                               current-events
+                               []
+                               (options)))))
+        (catch Exception e
+          (errors/exception e)))))))
 
 (defn- register-event
   "Registers an event to be sent later"
