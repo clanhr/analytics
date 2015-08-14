@@ -25,24 +25,31 @@
   []
   (= "true" (env :clanhr-analytics-verbose)))
 
+(defn dequeue!
+  [queue]
+  (loop []
+    (let [current-events @queue]
+      (if (compare-and-set! queue current-events [])
+        current-events
+        (recur)))))
+
 (def ^:private events-processor
   (delay (future
-    (while true
-      (try
-        (do (Thread/sleep 1000)
-          (let [current-events @events
-                n-events (count current-events)]
-            (when (< 0 n-events)
-              (reset! events [])
-              (metrics/collate (librato-user)
-                               (librato-token)
-                               current-events
-                               []
-                               (options)))
-            (when (and (< 0 n-events) (verbose?))
-              (println "** Registered" (count current-events) "events on librato"))))
-        (catch Exception e
-          (errors/exception e)))))))
+           (while true
+             (try
+               (do (Thread/sleep 1000)
+                   (let [current-events (dequeue! events)
+                         n-events (count current-events)]
+                     (when (< 0 n-events)
+                       (metrics/collate (librato-user)
+                                        (librato-token)
+                                        current-events
+                                        []
+                                        (options)))
+                     (when (and (< 0 n-events) (verbose?))
+                       (println "** Registered" (count current-events) "events on librato"))))
+               (catch Exception e
+                 (errors/exception e)))))))
 
 (defn- register-event
   "Registers an event to be sent later"
