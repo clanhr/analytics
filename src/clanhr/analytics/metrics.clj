@@ -30,16 +30,17 @@
     (while true
       (try
         (do (Thread/sleep 1000)
-          (let [current-events @events]
-            (when (verbose?)
-              (println "** Registering" (count current-events) "events on librato..."))
-            (when (< 0 (count current-events))
+          (let [current-events @events
+                n-events (count current-events)]
+            (when (< 0 n-events)
               (reset! events [])
               (metrics/collate (librato-user)
                                (librato-token)
                                current-events
                                []
-                               (options)))))
+                               (options)))
+            (when (and (< 0 n-events) (verbose?))
+              (println "** Registered" (count current-events) "events on librato"))))
         (catch Exception e
           (errors/exception e)))))))
 
@@ -65,12 +66,12 @@
   (when (log-stdout?)
     (println (str "[" source "] " event-name " " value " - " description)))
   (when (log-librato?)
-    (let [current-time (/ (tc/to-long (t/now)) 1000.0)]
+    (let [current-time (int (/ (tc/to-long (t/now)) 1000.0))]
       (register-event {:name event-name
-                           :source source
-                           :period default-metric-period
-                           :measure_time current-time
-                           :value value }))))
+                       :source source
+                       :period default-metric-period
+                       :measure_time current-time
+                       :value value }))))
 
 (defn postgres-request
   "Tracks a postgres query"
