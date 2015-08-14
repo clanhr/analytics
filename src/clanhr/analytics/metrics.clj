@@ -25,23 +25,36 @@
   []
   (= "true" (env :clanhr-analytics-verbose)))
 
+(defn dequeue!
+  [queue]
+  (loop []
+    (let [current-events @queue]
+      (if (or (empty? current-events) (compare-and-set! queue current-events []))
+        current-events
+        (recur)))))
+
+(defn- send-to-librato!
+  "Sends data to librato"
+  [current-events]
+  (metrics/collate (librato-user)
+                   (librato-token)
+                   current-events
+                   []
+                   (options)))
+
 (def ^:private events-processor
   (delay (future
-    (while true
-      (try
-        (do (Thread/sleep 1000)
-          (let [current-events @events]
-            (when (verbose?)
-              (println "** Registering" (count current-events) "events on librato..."))
-            (when (< 0 (count current-events))
-              (reset! events [])
-              (metrics/collate (librato-user)
-                               (librato-token)
-                               current-events
-                               []
-                               (options)))))
-        (catch Exception e
-          (errors/exception e)))))))
+           (while true
+             (try
+               (do (Thread/sleep 1000)
+                   (let [current-events (dequeue! events)
+                         n-events (count current-events)]
+                     (when (< 0 n-events)
+                       (let [result (send-to-librato! current-events)]
+                         (when (verbose?)
+                           (println "** [analytics] Registered" (count current-events) "events on librato:, status:" (:status result)))))))
+               (catch Exception e
+                 (errors/exception e)))))))
 
 (defn- register-event
   "Registers an event to be sent later"
@@ -57,7 +70,7 @@
 (defn- log-librato?
   "True if the lib should send stuff to librato metrics"
   []
-  (= "true" (env :clanhr-analytics-log-librato)))
+  (not= "false" (env :clanhr-analytics-log-librato)))
 
 (defn- register
   "Registers a metric to librato"
@@ -65,12 +78,12 @@
   (when (log-stdout?)
     (println (str "[" source "] " event-name " " value " - " description)))
   (when (log-librato?)
-    (let [current-time (/ (tc/to-long (t/now)) 1000.0)]
+    (let [current-time (int (/ (tc/to-long (t/now)) 1000.0))]
       (register-event {:name event-name
-                           :source source
-                           :period default-metric-period
-                           :measure_time current-time
-                           :value value }))))
+                       :source source
+                       :period default-metric-period
+                       :measure_time current-time
+                       :value value }))))
 
 (defn postgres-request
   "Tracks a postgres query"
