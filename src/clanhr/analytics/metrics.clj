@@ -29,9 +29,18 @@
   [queue]
   (loop []
     (let [current-events @queue]
-      (if (compare-and-set! queue current-events [])
+      (if (or (empty? current-events) (compare-and-set! queue current-events []))
         current-events
         (recur)))))
+
+(defn- send-to-librato!
+  "Sends data to librato"
+  [current-events]
+  (metrics/collate (librato-user)
+                   (librato-token)
+                   current-events
+                   []
+                   (options)))
 
 (def ^:private events-processor
   (delay (future
@@ -41,13 +50,9 @@
                    (let [current-events (dequeue! events)
                          n-events (count current-events)]
                      (when (< 0 n-events)
-                       (metrics/collate (librato-user)
-                                        (librato-token)
-                                        current-events
-                                        []
-                                        (options)))
-                     (when (and (< 0 n-events) (verbose?))
-                       (println "** Registered" (count current-events) "events on librato"))))
+                       (let [result (send-to-librato! current-events)]
+                         (when (verbose?)
+                           (println "** [analytics] Registered" (count current-events) "events on librato:, status:" (:status result)))))))
                (catch Exception e
                  (errors/exception e)))))))
 
@@ -65,7 +70,7 @@
 (defn- log-librato?
   "True if the lib should send stuff to librato metrics"
   []
-  (= "true" (env :clanhr-analytics-log-librato)))
+  (not= "false" (env :clanhr-analytics-log-librato)))
 
 (defn- register
   "Registers a metric to librato"
