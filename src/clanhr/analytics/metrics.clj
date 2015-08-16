@@ -1,11 +1,14 @@
 (ns clanhr.analytics.metrics
   (:require [clj-librato.metrics :as metrics]
+            [riemann.client :as r]
             [clanhr.analytics.errors :as errors]
             [clj-time.core :as t]
             [clj-time.local :as l]
             [clj-time.coerce :as tc]
             [environ.core :refer [env]]))
 
+(def riemann (delay (r/tcp-client {:host (env :clanhr-analytics-riemann)
+                                  :port 5555})))
 (defn- librato-user [] (or (env :clanhr-librato-user) "hello@clanhr.com"))
 (defn- librato-token [] (or (env :clanhr-librato-token) "01b9c40f133a51729da4cb6399b558732c2c5065af71211918f888fad92fe8ef"))
 (def default-metric-period 15)
@@ -72,11 +75,23 @@
   []
   (not= "false" (env :clanhr-analytics-log-librato)))
 
+(defn- log-riemann?
+  "True if the lib should send stuff to riemann"
+  []
+  (env :clanhr-analytics-riemann))
+
 (defn- register
   "Registers a metric to librato"
   [env-name source event-name value description]
   (when (log-stdout?)
     (println (str "[" source "] " event-name " " value " - " description)))
+  (when (log-riemann?)
+    (println (-> @riemann
+        (r/send-event {:event-name event-name
+                       :state "ok"
+                       :service source
+                       :metric value})
+        (deref 5000 ::timeout))))
   (when (log-librato?)
     (let [current-time (int (/ (tc/to-long (t/now)) 1000.0))]
       (register-event {:name event-name

@@ -10,4 +10,5 @@
                  [clj-bugsnag "0.2.3"]
                  [environ "1.0.0"]
                  [clj-librato "0.0.5"]
+                 [riemann-clojure-client "0.4.1"]
                  [analytics-clj "0.2.2"]])
