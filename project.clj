@@ -10,4 +10,13 @@
                  [clj-bugsnag "0.2.3"]
                  [environ "1.0.0"]
                  [clj-librato "0.0.5"]
-                 [analytics-clj "0.2.2"]])
+                 [analytics-clj "0.2.2"]
+
+                 ;; disable analytics-clj log
+                 [org.slf4j/slf4j-nop "1.7.12"]
+
+                 ;; turn on for major analytics logs
+                 ;[org.slf4j/jcl-over-slf4j "1.7.5"]
+                 ;[ch.qos.logback/logback-classic "1.0.13"]
+                 ;kkk[ch.qos.logback/logback-core "1.0.13"]
+                 ])
