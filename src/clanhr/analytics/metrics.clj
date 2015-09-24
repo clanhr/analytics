@@ -109,3 +109,13 @@
           elapsed (/ (double (- (. System (nanoTime)) start)) 1000000.0)]
       (http-request (env :clanhr-env) service-name (int elapsed) request response)
       response)))
+
+(defn api-request
+  "Tracks a http request to a ClanHR API endpoint"
+  [env-name source elapsed request response]
+  (let [uri (:url request)
+        method (:request-method request)]
+    (when-not (= :options method)
+      (register env-name (name source) (str env-name ".internal-api.ms") elapsed
+                (str method " " uri " " (:status response))))))
+
