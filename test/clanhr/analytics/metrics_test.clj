@@ -10,3 +10,7 @@
   (metrics/http-request "test" "clanhr.analytics.http" 10 {:uri "/"} {:status 200})
   (Thread/sleep 3000))
 
+(deftest api-request
+  (metrics/api-request "test" :directory-api 10 {:url "/"} {:status 200})
+  (Thread/sleep 3000))
+
