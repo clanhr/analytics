@@ -10,5 +10,8 @@
   (core/identify user-id nil true)
   (core/identify user-id {} true))
 
+(deftest smoke-test-make-alias
+  (core/make-alias "id1" "id2" true))
+
 (deftest smoke-test-track
   (core/track user-id "Clojure unit test" true))
