@@ -63,6 +63,11 @@
                         traits
                         (build-options user-id "identify" traits))))
 
+(defn make-alias
+  "Marks two user-ids as the same identity"
+  [user1 user2 test?]
+  (analytics/make-alias (get-user-client test?) user1 user2))
+
 (defn track
   "Tracks an event for a given user"
   ([user-id event-name test?]
