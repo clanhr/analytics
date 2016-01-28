@@ -14,3 +14,7 @@
   (metrics/api-request "test" :directory-api 10 {:url "/"} {:status 200})
   (Thread/sleep 3000))
 
+(deftest new-entity
+  (metrics/new-entity "user")
+  (Thread/sleep 3000))
+
