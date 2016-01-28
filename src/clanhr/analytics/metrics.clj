@@ -85,6 +85,11 @@
                        :measure_time current-time
                        :value value }))))
 
+(defn new-entity
+  "Registers a new entity on the system"
+  [entity-name]
+  (register (env :clanhr-env) entity-name "new-entity" 1 entity-name))
+
 (defn postgres-request
   "Tracks a postgres query"
   [env-name source elapsed query]
