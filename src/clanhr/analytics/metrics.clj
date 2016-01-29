@@ -88,7 +88,11 @@
 (defn new-entity
   "Registers a new entity on the system"
   [entity-name]
-  (register (env :clanhr-env) entity-name "new-entity" 1 entity-name))
+  (register (env :clanhr-env)
+            entity-name
+            (str (env :clanhr-env) ".new-entity")
+            1
+            entity-name))
 
 (defn postgres-request
   "Tracks a postgres query"
