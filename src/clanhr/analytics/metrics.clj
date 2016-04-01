@@ -94,6 +94,17 @@
             1
             entity-name))
 
+(defn track
+  "Tracks an event with a value"
+  ([event-name source]
+   (track event-name source 1))
+  ([event-name source event-value]
+   (register (env :clanhr-env)
+             source
+             (str (env :clanhr-env) "." event-name)
+             event-value
+             (str event-name " " source))))
+
 (defn postgres-request
   "Tracks a postgres query"
   [env-name source elapsed query]

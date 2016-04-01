@@ -18,3 +18,7 @@
   (metrics/new-entity "user")
   (Thread/sleep 3000))
 
+(deftest track
+  (metrics/track "event" "source" 1)
+  (Thread/sleep 3000))
+
