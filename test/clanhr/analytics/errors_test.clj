@@ -1,5 +1,6 @@
 (ns clanhr.analytics.errors-test
   (:require [clojure.test :refer :all]
+            [result.core :as result]
             [clanhr.analytics.errors :as errors]))
 
 (deftest exception
@@ -12,4 +13,6 @@
                      :personal-data {:company "Company"}}))
 
 (deftest error
-  (errors/error "Some error"))
+  (testing "non exception instance"
+    (let [result (errors/error {})]
+      (is (result/failed? result)))))

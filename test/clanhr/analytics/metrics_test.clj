@@ -21,4 +21,3 @@
 (deftest track
   (metrics/track "event" "source" 1)
   (Thread/sleep 3000))
-
