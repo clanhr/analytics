@@ -28,12 +28,19 @@
   (println request)
   (exception ex request))
 
+(defn object->hash-map
+  [obj]
+  (cond-> obj
+    (not (map? obj)) {:info obj}))
+
 (defn error
   "Registers a specific error"
   ([e] (error e {} {}))
   ([e info] (error e info {}))
   ([e info user]
-   (exception (RuntimeException. e) info user)
+   (if (instance? Throwable e)
+     (exception (RuntimeException. e) info user)
+     (exception (ex-info "error" (object->hash-map e)) info user))
    (result/failure e)))
 
 (Thread/setDefaultUncaughtExceptionHandler
