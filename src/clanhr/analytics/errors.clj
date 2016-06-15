@@ -15,7 +15,10 @@
    (bugsnag/notify
      ex
      {:api-key (bugsnag-key)
-      :environment (or (env :clanhr-env) "test")
+      :environment (or 
+                     (env :clanhr-env)
+                     (env :environment)
+                     "test")
       :project-ns "clanhr"
       :meta info
       :user user})
