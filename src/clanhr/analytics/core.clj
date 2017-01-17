@@ -1,6 +1,7 @@
 (ns clanhr.analytics.core
   (:require [ardoq.analytics-clj :as analytics]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]]
+            [clojure.walk :as walk]))
 
 (def ^:private segment-test-token "IBqHKDwieBPjkZMtqhYbxStKc0KziG4M")
 
@@ -68,6 +69,10 @@
   [user1 user2 test?]
   (analytics/make-alias (get-user-client test?) user1 user2))
 
+(defn stringify-keys
+  [traits]
+  (walk/stringify-keys traits))
+
 (defn track
   "Tracks an event for a given user"
   ([user-id event-name test?]
@@ -76,5 +81,5 @@
    (analytics/track (get-user-client test?)
                     user-id
                     event-name
-                    traits
+                    (stringify-keys traits)
                     (build-options user-id event-name traits))))
