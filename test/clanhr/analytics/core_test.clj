@@ -15,3 +15,11 @@
 
 (deftest smoke-test-track
   (core/track user-id "Clojure unit test" true))
+
+(deftest stringify-keys
+  (testing "plain map"
+    (is (= {"key-1" 1 "key-2" 2} (core/stringify-keys {:key-1 1 "key-2" 2}))))
+
+  (testing "deeper map"
+    (is (= {"key-1" {"key-3" 3} "key-2" 2} (core/stringify-keys {:key-1 {:key-3 3} "key-2" 2}))))
+  )
