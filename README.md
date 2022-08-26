@@ -1,2 +1,1 @@
-# ClanHR Specific Analytics [![Build Status](https://travis-ci.org/clanhr/analytics.svg)](https://travis-ci.org/clanhr/analytics)
-
+# ClanHR Specific Analytics [![Build Status](https://app.travis-ci.com/clanhr/analytics.svg?branch=master)](https://app.travis-ci.com/clanhr/analytics)
